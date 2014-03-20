@@ -22,14 +22,13 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	Button button1;
 	TextView textView1;
 	AudioManager audioManager;
-	SeekBar seekBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		seekBar = (SeekBar) findViewById(R.id.seekBar1);
+		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar1);
 		seekBar.setOnSeekBarChangeListener(this);
 		buttonPlay();
 		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
