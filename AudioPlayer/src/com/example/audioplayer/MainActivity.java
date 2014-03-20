@@ -1,57 +1,67 @@
 package com.example.audioplayer;
 
 import android.app.Activity;
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements OnPreparedListener,
-		OnCompletionListener {
+public class MainActivity extends Activity implements OnCompletionListener,
+		OnSeekBarChangeListener {
 
-	public int k = 0;
-	MediaPlayer mediaPlayer;
+	public int status = 0; // 0-Idle,1-Play,2-Pause
+
+	Button button1;
 	TextView textView1;
-	private OnCompletionListener ololo;
+	AudioManager audioManager;
+	SeekBar seekBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		text();
-		button();
 
-		// textView1.setText("Нажата кнопка ОК");
+		seekBar = (SeekBar) findViewById(R.id.seekBar1);
+		seekBar.setOnSeekBarChangeListener(this);
+		buttonPlay();
+		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+		seekBar.setProgress(0);
+
 	}
 
-	Button button1;
+	public void buttonPlay() {
 
-	public void button() {
+		final MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.a);
 
+		textView1 = (TextView) findViewById(R.id.textView1);
 		button1 = (Button) findViewById(R.id.button1);
-		mediaPlayer = MediaPlayer.create(this, R.raw.a);
-		// создаем обработчик нажатия
+
 		OnClickListener oclBtnOk = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// Меняем текст в TextView (tvOut)
 
-				if (k == 0 || k == 2) {
-					k = 1;
+				if (status == 0 || status == 2) {
+					status = 1;
 					button1.setText("Pause");
-					text();
+					textView1.setText("Status: Play");
+					// text();
 					if (!mediaPlayer.isPlaying())
 						mediaPlayer.start();
 
-				} else if (k == 1) {
-					k = 2;
+				} else if (status == 1) {
+					status = 2;
 					button1.setText("Play");
-					text();
+					textView1.setText("Status: Pause");
+
 					if (mediaPlayer.isPlaying())
 						mediaPlayer.pause();
 				}
@@ -59,22 +69,8 @@ public class MainActivity extends Activity implements OnPreparedListener,
 			}
 		};
 		mediaPlayer.setOnCompletionListener(this);
-		// присвоим обработчик кнопке OK (btnOk)
+
 		button1.setOnClickListener(oclBtnOk);
-	}
-
-	public void text() {
-
-		textView1 = (TextView) findViewById(R.id.textView1);
-		if (k == 0)
-			textView1.setText("Idle");
-		else if (k == 1) {
-
-			textView1.setText("Play");
-		} else if (k == 2) {
-			textView1.setText("Pause");
-
-		}
 	}
 
 	@Override
@@ -87,14 +83,28 @@ public class MainActivity extends Activity implements OnPreparedListener,
 	@Override
 	public void onCompletion(MediaPlayer mp) {
 		// TODO Auto-generated method stub
-
-		k = 0;
-		text();
+		status = 0;
+		textView1.setText("Status: Idle");
 		button1.setText("Play");
 	}
 
 	@Override
-	public void onPrepared(MediaPlayer arg0) {
+	public void onProgressChanged(SeekBar arg0, int currentSeekBar, boolean arg2) {
+		// TODO Auto-generated method stub
+
+		final int volume = (int) (currentSeekBar * 15 / 100);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar arg0) {
 		// TODO Auto-generated method stub
 
 	}
