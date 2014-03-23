@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -21,31 +19,31 @@ import android.widget.TextView;
 
 import com.example.audioplayer.PlayerService.LocalBinder;
 
-public class MainActivity extends Activity implements OnCompletionListener,
-		OnSeekBarChangeListener {
-
-	public int status = 0; // 0-Idle,1-Play,2-Pause
+public class MainActivity extends Activity implements OnSeekBarChangeListener {
 
 	Button button1;
 	TextView textView1;
 
 	AudioManager audioManager;
-	public statusOfMusic statusMusic = statusOfMusic.idle;
+
 	PlayerService mService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		button1 = (Button) findViewById(R.id.button1);
+		textView1 = (TextView) findViewById(R.id.textView1);
+		Log.v(this.getClass().getName(), "сработал онкреет в мэине");
 
 		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar1);
-		ololo();
-		// f();
-
 		seekBar.setOnSeekBarChangeListener(this);
 		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0);
-		seekBar.setProgress(0);
+		seekBar.setProgress(100);
+
+		ololo();
+		f();
 
 	}
 
@@ -53,8 +51,8 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	protected void onStart() {
 		super.onStart();
 		// Bind to LocalService
-		Intent intent = new Intent(MainActivity.this, PlayerService.class);
-		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		Log.v(this.getClass().getName(), "сработал онстарт в мэине");
+
 	}
 
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -64,24 +62,33 @@ public class MainActivity extends Activity implements OnCompletionListener,
 			// LocalService instance
 			LocalBinder binder = (LocalBinder) service;
 			mService = binder.getService();
+			Log.v(this.getClass().getName(), "какая то хрень с сервисом");
 
+			if (mService.statusMusic == mService.statusMusic.play
+					|| mService.statusMusic == mService.statusMusic.pause) {
+				textView1.setText(mService.d());
+				button1.setText(mService.c());
+			} else {
+				textView1.setText("idle");
+				button1.setText(mService.c());
+			}
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
-
+			Log.v(this.getClass().getName(), "сервис дисконект");
 		}
 	};
 
 	public void f() {
-		startService(new Intent(MainActivity.this, PlayerService.class));
+		Intent intent = new Intent(MainActivity.this, PlayerService.class);
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		Log.v(this.getClass().getName(), "сработал метод ф");
 	}
 
 	public void ololo()
 
 	{
-		button1 = (Button) findViewById(R.id.button1);
-		textView1 = (TextView) findViewById(R.id.textView1);
 
 		OnClickListener oclBtnOk = new OnClickListener() {
 			@Override
@@ -90,46 +97,9 @@ public class MainActivity extends Activity implements OnCompletionListener,
 				case R.id.button1:
 					mService.a();
 					Log.v(this.getClass().getName(),
-							"onClick: Starting service.");
-					/*
-					 * Log.v(this.getClass().getName(),
-					 * "onClick: Starting service."); startService(new
-					 * Intent(MainActivity.this, PlayerService.class));
-					 */
-					/*
-					 * startService(new Intent(MainActivity.this,
-					 * PlayerService.class)); // statusOfMusic statusMusic =
-					 * statusOfMusic.idle; if (statusMusic == statusOfMusic.idle
-					 * || statusMusic == statusOfMusic.pause) { statusMusic =
-					 * statusOfMusic.play; button1.setText("Pause");
-					 * textView1.setText("Status: Play");
-					 * 
-					 * } else if (statusMusic == statusOfMusic.play) {
-					 * statusMusic = statusOfMusic.pause;
-					 * button1.setText("Play");
-					 * textView1.setText("Status: Pause");
-					 * 
-					 * }
-					 */
-
-					/*
-					 * switch (statusMusic) { case idle:
-					 * 
-					 * 
-					 * 
-					 * textView1.setText("play"); button1.setText("pause");
-					 * statusMusic = statusOfMusic.play; break; case play:
-					 * 
-					 * //stopService(new Intent(MainActivity.this,
-					 * PlayerService.class)); button1.setText("play");
-					 * textView1.setText("idle"); statusMusic =
-					 * statusOfMusic.idle; break; case pause:
-					 * button1.setText("play"); textView1.setText("pause");
-					 * statusMusic = statusOfMusic.play;
-					 * 
-					 * break; }
-					 */
-
+							"onClick: Starting service нажали кнпочку.");
+					textView1.setText(mService.d());
+					button1.setText(mService.c());
 					break;
 
 				}
@@ -143,43 +113,9 @@ public class MainActivity extends Activity implements OnCompletionListener,
 	public void onBackPressed() {
 
 		Log.v(this.getClass().getName(), "onClick: Stopping service.");
-		stopService(new Intent(this, PlayerService.class));
+		stopService(new Intent(MainActivity.this, PlayerService.class));
+		mService.b();
 		this.moveTaskToBack(true);
-	}
-
-	public void buttonPlay() {
-
-		final MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.a);
-
-		textView1 = (TextView) findViewById(R.id.textView1);
-		button1 = (Button) findViewById(R.id.button1);
-
-		OnClickListener oclBtnOk = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-
-				if (status == 0 || status == 2) {
-					status = 1;
-					button1.setText("Pause");
-					textView1.setText("Status: Play");
-					// text();
-					if (!mediaPlayer.isPlaying())
-						mediaPlayer.start();
-
-				} else if (status == 1) {
-					status = 2;
-					button1.setText("Play");
-					textView1.setText("Status: Pause");
-
-					if (mediaPlayer.isPlaying())
-						mediaPlayer.pause();
-				}
-
-			}
-		};
-		mediaPlayer.setOnCompletionListener(this);
-
-		button1.setOnClickListener(oclBtnOk);
 	}
 
 	@Override
@@ -187,14 +123,6 @@ public class MainActivity extends Activity implements OnCompletionListener,
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
-	}
-
-	@Override
-	public void onCompletion(MediaPlayer mp) {
-		// TODO Auto-generated method stub
-		status = 0;
-		textView1.setText("Status: Idle");
-		button1.setText("Play");
 	}
 
 	@Override
