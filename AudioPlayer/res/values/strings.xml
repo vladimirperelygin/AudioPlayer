@@ -6,5 +6,10 @@
     <string name="Idle">Status: Idle</string>
     <string name="Play">Play</string>
     <string name="Music">Music.mp3</string>
-
+    <string name="StatusIdle">Status: Idle</string>
+	<string name="StatusPlay">Status: Play</string>
+	<string name="StatusPause">Status: Pause</string>
+	
+	<string name="ButtonTextPlay">Play</string>
+	<string name="ButtonTextPause">Pause</string>
 </resources>

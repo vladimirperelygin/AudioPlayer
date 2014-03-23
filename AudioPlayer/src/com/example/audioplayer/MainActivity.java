@@ -21,72 +21,71 @@ import com.example.audioplayer.PlayerService.LocalBinder;
 
 public class MainActivity extends Activity implements OnSeekBarChangeListener {
 
-	Button button1;
-	TextView textView1;
+	Button buttonPlayPause;
+	TextView textStatusPlayer;
 
 	AudioManager audioManager;
-
+	final int maxVolume = 15; // константа максимального значения громкости
 	PlayerService mService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		button1 = (Button) findViewById(R.id.button1);
-		textView1 = (TextView) findViewById(R.id.textView1);
-		Log.v(this.getClass().getName(), "сработал онкреет в мэине");
 
-		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar1);
-		seekBar.setOnSeekBarChangeListener(this);
+		buttonPlayPause = (Button) findViewById(R.id.buttonPlayPause);
+		textStatusPlayer = (TextView) findViewById(R.id.textStatusPlayer);
+
+		SeekBar seekBarVolume = (SeekBar) findViewById(R.id.seekBarVolumeLevel);
+		seekBarVolume.setOnSeekBarChangeListener(this);
 		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0);
-		seekBar.setProgress(100);
+		seekBarVolume.setProgress(100);
 
-		ololo();
-		f();
+		ButtonPlayStopOnClick();
+		startService();
 
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		// Bind to LocalService
-		Log.v(this.getClass().getName(), "сработал онстарт в мэине");
 
 	}
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			// We've bound to LocalService, cast the IBinder and get
-			// LocalService instance
+
 			LocalBinder binder = (LocalBinder) service;
 			mService = binder.getService();
-			Log.v(this.getClass().getName(), "какая то хрень с сервисом");
+			Log.v(this.getClass().getName(), "Service connected");
 
+			// передаются из сервиса значения текстовых полей
 			if (mService.statusMusic == mService.statusMusic.play
 					|| mService.statusMusic == mService.statusMusic.pause) {
-				textView1.setText(mService.d());
-				button1.setText(mService.c());
+				textStatusPlayer.setText(mService.textStatusOfPlayer());
+				buttonPlayPause.setText(mService.textButtonPlayPause());
 			} else {
-				textView1.setText("idle");
-				button1.setText(mService.c());
+				textStatusPlayer.setText(R.string.StatusIdle);
+				buttonPlayPause.setText(mService.textButtonPlayPause());
 			}
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
-			Log.v(this.getClass().getName(), "сервис дисконект");
+			Log.v(this.getClass().getName(), "Service Disconnected");
 		}
 	};
 
-	public void f() {
+	public void startService() {
 		Intent intent = new Intent(MainActivity.this, PlayerService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-		Log.v(this.getClass().getName(), "сработал метод ф");
+		Log.v(this.getClass().getName(), "сработал метод запуска Service");
 	}
 
-	public void ololo()
+	// выполняется при нажатии кнопки
+	public void ButtonPlayStopOnClick()
 
 	{
 
@@ -94,27 +93,26 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 			@Override
 			public void onClick(View v) {
 				switch (v.getId()) {
-				case R.id.button1:
-					mService.a();
-					Log.v(this.getClass().getName(),
-							"onClick: Starting service нажали кнпочку.");
-					textView1.setText(mService.d());
-					button1.setText(mService.c());
+				case R.id.buttonPlayPause:
+					mService.PlayPausePlayer();
+					Log.v(this.getClass().getName(), "onClick");
+					textStatusPlayer.setText(mService.textStatusOfPlayer());
+					buttonPlayPause.setText(mService.textButtonPlayPause());
 					break;
 
 				}
 			}
 		};
 
-		button1.setOnClickListener(oclBtnOk);
+		buttonPlayPause.setOnClickListener(oclBtnOk);
 	}
 
 	@Override
 	public void onBackPressed() {
 
-		Log.v(this.getClass().getName(), "onClick: Stopping service.");
+		Log.v(this.getClass().getName(), "Stop service");
 		stopService(new Intent(MainActivity.this, PlayerService.class));
-		mService.b();
+		mService.PlayerPause();
 		this.moveTaskToBack(true);
 	}
 
@@ -129,8 +127,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 	public void onProgressChanged(SeekBar arg0, int currentSeekBar, boolean arg2) {
 		// TODO Auto-generated method stub
 
-		final int volume = (int) (currentSeekBar * 15 / 100);
-		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+		final int setVolume = (int) (currentSeekBar * maxVolume / 100);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, setVolume, 0);
 
 	}
 

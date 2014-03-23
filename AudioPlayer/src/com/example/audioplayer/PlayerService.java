@@ -11,21 +11,17 @@ import android.util.Log;
 
 public class PlayerService extends Service implements OnCompletionListener {
 
-	statusOfMusic statusMusic = statusOfMusic.idle;
+	statusOfMusic statusMusic = statusOfMusic.idle; // состояние плеера
 
 	AudioManager audioManager;
 	MediaPlayer mediaPlayer;
-
-	public String Play = "play";
-	public String Idle = "idle";
-	public String Pause = "pause";
 
 	private final IBinder mBinder = new LocalBinder();
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
-		Log.v(this.getClass().getName(), "онбинд 2");
+
 		return mBinder;
 
 	}
@@ -33,55 +29,55 @@ public class PlayerService extends Service implements OnCompletionListener {
 	@Override
 	public void onCreate() {
 		mediaPlayer = MediaPlayer.create(this, R.raw.a);
-		Log.v(this.getClass().getName(), "он креет 2");
+		Log.v(this.getClass().getName(), "OnCreateService");
 	}
 
-	public String c() { // возвращает строку статуса кнопки
-		String s = "Play";
+	public int textButtonPlayPause() { // возвращает строку статуса кнопки
+		// int status = "Play";
+		int status = R.string.ButtonTextPlay;
 		if (statusMusic == statusOfMusic.idle
 				|| statusMusic == statusOfMusic.pause) {
 
-			Log.v(this.getClass().getName(), "типа плей строка");
-			s = "Play";
+			status = R.string.ButtonTextPlay;
+			;
 
 		} else if (statusMusic == statusOfMusic.play) {
 
-			Log.v(this.getClass().getName(), "типа стоп строка");
-			s = "Pause";
+			status = R.string.ButtonTextPause;
 		}
-		return s;
+		return status;
 	}
 
-	public String d() { // возвращает строку для тексвью какой сейчас статус
-		String s = "idle";
+	// возвращает строку для тексвью какой сейчас статус
+	public int textStatusOfPlayer() {
+		int status = R.string.StatusIdle;
 
 		if (statusMusic == statusOfMusic.idle
 				|| statusMusic == statusOfMusic.pause) {
 
-			Log.v(this.getClass().getName(), "типа плей строка");
-			s = "Pause";
+			status = R.string.StatusPause;
 
 		} else if (statusMusic == statusOfMusic.play) {
 
-			Log.v(this.getClass().getName(), "типа стоп строка");
-			s = "Play";
+			status = R.string.StatusPlay;
 		}
-
-		return s;
+		return status;
 	}
 
-	public void a() { // воспроизводит музыку, паузу там и т п
+	// воспроизводит/приостанавливает музыку, устанавливает статусы в каком
+	// состоянии плеер
+	public void PlayPausePlayer() {
 
 		if (statusMusic == statusOfMusic.idle
 				|| statusMusic == statusOfMusic.pause) {
 			statusMusic = statusOfMusic.play;
-			Log.v(this.getClass().getName(), "типа плей");
+			Log.v(this.getClass().getName(), "Play player");
 			if (!mediaPlayer.isPlaying())
 				mediaPlayer.start();
 
 		} else if (statusMusic == statusOfMusic.play) {
 			statusMusic = statusOfMusic.pause;
-			Log.v(this.getClass().getName(), "типа стоп");
+			Log.v(this.getClass().getName(), "Pause player");
 			if (mediaPlayer.isPlaying())
 				mediaPlayer.pause();
 
@@ -89,7 +85,9 @@ public class PlayerService extends Service implements OnCompletionListener {
 		mediaPlayer.setOnCompletionListener(this);
 	}
 
-	public void b() {
+	// ставит плеер на паузу, создан для вызова в активити в событии нажатии
+	// кнопки "назад"
+	public void PlayerPause() {
 		statusMusic = statusOfMusic.pause;
 		if (mediaPlayer.isPlaying())
 			mediaPlayer.pause();
@@ -98,8 +96,6 @@ public class PlayerService extends Service implements OnCompletionListener {
 	public class LocalBinder extends Binder {
 		PlayerService getService() {
 
-			Log.v(this.getClass().getName(),
-					"каая то херотень в новом классе локалбиндер");
 			return PlayerService.this;
 
 		}
@@ -108,15 +104,14 @@ public class PlayerService extends Service implements OnCompletionListener {
 	@Override
 	public void onDestroy() {
 
-		Log.v(this.getClass().getName(), "устрой дестрой йопта 2");
 	}
 
 	@Override
 	public void onStart(Intent intent, int startid) {
 
-		Log.v(this.getClass().getName(), "стартуем 2");
 	}
 
+	// событие по окончанию трека
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
 		// TODO Auto-generated method stub

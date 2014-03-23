@@ -8,39 +8,38 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="78dp"
-        android:text="@string/Play" />
-
     <SeekBar
-        android:id="@+id/seekBar1"
+        android:id="@+id/seekBarVolumeLevel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="14dp" />
 
-    <TextView
-        android:id="@+id/textView2"
+    <Button
+        android:id="@+id/buttonPlayPause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBar1"
+        android:layout_below="@+id/textStatusPlayer"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="67dp"
-        android:text="@string/Music" />
+        android:layout_marginTop="78dp"
+        android:text="@string/Play" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/textStatusPlayer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:text="@string/Idle" />
+
+    <TextView
+        android:id="@+id/textMusic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"       
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+  
+        android:text="@string/Music" />
 
 </RelativeLayout>
