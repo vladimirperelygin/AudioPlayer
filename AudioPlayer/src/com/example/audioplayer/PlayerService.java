@@ -2,7 +2,6 @@ package com.example.audioplayer;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Binder;
@@ -11,9 +10,8 @@ import android.util.Log;
 
 public class PlayerService extends Service implements OnCompletionListener {
 
-	statusOfMusic statusMusic = statusOfMusic.idle; // состояние плеера
+	statusOfMusic statusMusic = statusOfMusic.idle; // status player
 
-	AudioManager audioManager;
 	MediaPlayer mediaPlayer;
 
 	private final IBinder mBinder = new LocalBinder();
@@ -32,8 +30,8 @@ public class PlayerService extends Service implements OnCompletionListener {
 		Log.v(this.getClass().getName(), "OnCreateService");
 	}
 
-	public int textButtonPlayPause() { // возвращает строку статуса кнопки
-		// int status = "Play";
+	public int textButtonPlayPause() {
+
 		int status = R.string.ButtonTextPlay;
 		if (statusMusic == statusOfMusic.idle
 				|| statusMusic == statusOfMusic.pause) {
@@ -48,7 +46,6 @@ public class PlayerService extends Service implements OnCompletionListener {
 		return status;
 	}
 
-	// возвращает строку для тексвью какой сейчас статус
 	public int textStatusOfPlayer() {
 		int status = R.string.StatusIdle;
 
@@ -64,8 +61,6 @@ public class PlayerService extends Service implements OnCompletionListener {
 		return status;
 	}
 
-	// воспроизводит/приостанавливает музыку, устанавливает статусы в каком
-	// состоянии плеер
 	public void PlayPausePlayer() {
 
 		if (statusMusic == statusOfMusic.idle
@@ -85,8 +80,6 @@ public class PlayerService extends Service implements OnCompletionListener {
 		mediaPlayer.setOnCompletionListener(this);
 	}
 
-	// ставит плеер на паузу, создан для вызова в активити в событии нажатии
-	// кнопки "назад"
 	public void PlayerPause() {
 		statusMusic = statusOfMusic.pause;
 		if (mediaPlayer.isPlaying())
@@ -111,11 +104,12 @@ public class PlayerService extends Service implements OnCompletionListener {
 
 	}
 
-	// событие по окончанию трека
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
 		// TODO Auto-generated method stub
 		statusMusic = statusOfMusic.idle;
+		Intent intent = new Intent(MainActivity.BROADCAST_ACTION);
+		sendBroadcast(intent);
 
 	}
 }

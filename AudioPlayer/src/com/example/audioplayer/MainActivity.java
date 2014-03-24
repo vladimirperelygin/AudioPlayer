@@ -1,9 +1,11 @@
 package com.example.audioplayer;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -25,8 +27,13 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 	TextView textStatusPlayer;
 
 	AudioManager audioManager;
-	final int maxVolume = 15; // константа максимального значения громкости
+	final int maxVolume = 15;
 	PlayerService mService;
+
+	statusOfMusic statusMusic;
+
+	BroadcastReceiver broadcastResiverServis;
+	public final static String BROADCAST_ACTION = "musicstopped";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +46,24 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 		SeekBar seekBarVolume = (SeekBar) findViewById(R.id.seekBarVolumeLevel);
 		seekBarVolume.setOnSeekBarChangeListener(this);
 		audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
 		seekBarVolume.setProgress(100);
 
 		ButtonPlayStopOnClick();
 		startService();
+
+		broadcastResiverServis = new BroadcastReceiver() {
+
+			public void onReceive(Context context, Intent intent) {
+
+				buttonPlayPause.setText(R.string.ButtonTextPlay);
+				textStatusPlayer.setText(R.string.StatusIdle);
+
+			}
+
+		};
+		IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
+		registerReceiver(broadcastResiverServis, intFilt);
 
 	}
 
@@ -53,6 +73,19 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 
 	}
 
+	public void setStatusText() {
+		if (mService.statusMusic == statusOfMusic.pause) {
+
+			buttonPlayPause.setText(R.string.ButtonTextPlay);
+			textStatusPlayer.setText(R.string.StatusPause);
+
+		} else if (mService.statusMusic == statusOfMusic.play) {
+
+			buttonPlayPause.setText(R.string.ButtonTextPause);
+			textStatusPlayer.setText(R.string.StatusPlay);
+		}
+	}
+
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -60,16 +93,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 			LocalBinder binder = (LocalBinder) service;
 			mService = binder.getService();
 			Log.v(this.getClass().getName(), "Service connected");
+			setStatusText();
 
-			// передаются из сервиса значения текстовых полей
-			if (mService.statusMusic == mService.statusMusic.play
-					|| mService.statusMusic == mService.statusMusic.pause) {
-				textStatusPlayer.setText(mService.textStatusOfPlayer());
-				buttonPlayPause.setText(mService.textButtonPlayPause());
-			} else {
-				textStatusPlayer.setText(R.string.StatusIdle);
-				buttonPlayPause.setText(mService.textButtonPlayPause());
-			}
 		}
 
 		@Override
@@ -81,10 +106,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 	public void startService() {
 		Intent intent = new Intent(MainActivity.this, PlayerService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-		Log.v(this.getClass().getName(), "сработал метод запуска Service");
+		Log.v(this.getClass().getName(), "StartService");
 	}
 
-	// выполняется при нажатии кнопки
 	public void ButtonPlayStopOnClick()
 
 	{
