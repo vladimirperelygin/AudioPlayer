@@ -19,46 +19,10 @@ public class PlayerService extends Service implements OnCompletionListener {
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
-
-		return mBinder;
-
-	}
-
-	@Override
-	public void onCreate() {
 		mediaPlayer = MediaPlayer.create(this, R.raw.a);
 		Log.v(this.getClass().getName(), "OnCreateService");
-	}
+		return mBinder;
 
-	public int textButtonPlayPause() {
-
-		int status = R.string.ButtonTextPlay;
-		if (statusMusic == statusOfMusic.idle
-				|| statusMusic == statusOfMusic.pause) {
-
-			status = R.string.ButtonTextPlay;
-			;
-
-		} else if (statusMusic == statusOfMusic.play) {
-
-			status = R.string.ButtonTextPause;
-		}
-		return status;
-	}
-
-	public int textStatusOfPlayer() {
-		int status = R.string.StatusIdle;
-
-		if (statusMusic == statusOfMusic.idle
-				|| statusMusic == statusOfMusic.pause) {
-
-			status = R.string.StatusPause;
-
-		} else if (statusMusic == statusOfMusic.play) {
-
-			status = R.string.StatusPlay;
-		}
-		return status;
 	}
 
 	public void PlayPausePlayer() {
@@ -92,16 +56,6 @@ public class PlayerService extends Service implements OnCompletionListener {
 			return PlayerService.this;
 
 		}
-	}
-
-	@Override
-	public void onDestroy() {
-
-	}
-
-	@Override
-	public void onStart(Intent intent, int startid) {
-
 	}
 
 	@Override

@@ -32,8 +32,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 
 	statusOfMusic statusMusic;
 
-	BroadcastReceiver broadcastResiverServis;
-	public final static String BROADCAST_ACTION = "musicstopped";
+	BroadcastReceiver mResiver;
+
+	public final static String BROADCAST_ACTION = "PlayerFlag";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +51,72 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 		seekBarVolume.setProgress(100);
 
 		ButtonPlayStopOnClick();
+
 		startService();
 
-		broadcastResiverServis = new BroadcastReceiver() {
+		Recive();
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.v(this.getClass().getName(), "RESUME");
+
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+
+	}
+
+	@Override
+	protected void onStop() {
+
+		super.onStop();
+
+	}
+
+	private ServiceConnection mConnection2 = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+
+			LocalBinder binder = (LocalBinder) service;
+			mService = binder.getService();
+			Log.v(this.getClass().getName(), "Service connected2");
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			Log.v(this.getClass().getName(), "Service Disconnected2");
+			mService = null;
+		}
+	};
+
+	@Override
+	protected void onDestroy() {
+
+		Intent intent = new Intent(MainActivity.this, PlayerService.class);
+		bindService(intent, mConnection2, Context.BIND_AUTO_CREATE);
+		mConnection2 = mConnection;
+
+		unbindService(mConnection);
+
+		unregisterReceiver(mResiver);
+
+		startService();
+
+		mConnection = mConnection2;
+		unbindService(mConnection2);
+
+		super.onDestroy();
+
+	}
+
+	public void Recive() {
+		mResiver = new BroadcastReceiver() {
 
 			public void onReceive(Context context, Intent intent) {
 
@@ -62,15 +126,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 			}
 
 		};
-		IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
-		registerReceiver(broadcastResiverServis, intFilt);
-
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-
+		IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION);
+		registerReceiver(mResiver, intentFilter);
 	}
 
 	public void setStatusText() {
@@ -100,12 +157,14 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 		@Override
 		public void onServiceDisconnected(ComponentName arg0) {
 			Log.v(this.getClass().getName(), "Service Disconnected");
+			mService = null;
 		}
 	};
 
 	public void startService() {
 		Intent intent = new Intent(MainActivity.this, PlayerService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
 		Log.v(this.getClass().getName(), "StartService");
 	}
 
@@ -120,8 +179,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener {
 				case R.id.buttonPlayPause:
 					mService.PlayPausePlayer();
 					Log.v(this.getClass().getName(), "onClick");
-					textStatusPlayer.setText(mService.textStatusOfPlayer());
-					buttonPlayPause.setText(mService.textButtonPlayPause());
+
+					setStatusText();
 					break;
 
 				}
